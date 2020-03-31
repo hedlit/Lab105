@@ -1,5 +1,1 @@
 *.class
-
-#For eclipse
-.project
-.classpath
