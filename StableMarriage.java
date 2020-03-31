@@ -164,11 +164,11 @@ public class StableMarriage {
 	}
 	
 	private void printResult() {
-		/*for(int i = 1; i <= matches.size(); i++) {
+		for(int i = 1; i <= matches.size(); i++) {
 			System.out.println(matches.get(i));
 		}
-		*/
 		
-		System.out.println("Algorithm time: " + algorithmTime + " and parse time: " + parseTime + " (milliseconds)");
+		
+		//System.out.println("Algorithm time: " + algorithmTime + " and parse time: " + parseTime + " (milliseconds)");
 	}
 }
