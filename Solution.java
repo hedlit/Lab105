@@ -122,15 +122,15 @@ public class Solution {
     }
 
     public void run(){
-        long startTimeParse = System.currentTimeMillis();
+        //long startTimeParse = System.currentTimeMillis();
         createFoundation(reader());
-        long endTimeParse = System.currentTimeMillis();
-        long startTimeGSA = System.currentTimeMillis();
+        //long endTimeParse = System.currentTimeMillis();
+        //long startTimeGSA = System.currentTimeMillis();
         pair();
-        long endTimeGSA = System.currentTimeMillis();
+        //long endTimeGSA = System.currentTimeMillis();
         print();
-        long timeToParse = endTimeParse - startTimeParse;
-        long timeToGSA = endTimeGSA - startTimeGSA;
-        System.out.println("Parsing: " + timeToParse + " and time for algorithm is: " + timeToGSA);
+        //long timeToParse = endTimeParse - startTimeParse;
+        //long timeToGSA = endTimeGSA - startTimeGSA;
+        //System.out.println("Parsing: " + timeToParse + " and time for algorithm is: " + timeToGSA);
     }
 }
