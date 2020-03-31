@@ -7,17 +7,28 @@
 \pagestyle{empty}
 
 \title{Stable Matching Report}
-\author{Author 1 and Author 2}
+\author{Jessica Lundmark and Tilde Höst}
 
 \begin{document}
   \maketitle
 
   \section{Results}
-
-  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
-
+  
+  All input files are returning correct values according to the script.
+  
+  For the "huge" input file (with N = 3000) it takes approximately 30 to 40 milliseconds to execute the algorithm, but also around 12 seconds to parse the input - significantly longer time.
+ 
   \section{Implementation details}
-
-  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+  
+  The solution is implemented pretty straight forward from the description in the book, with only one class and admittedly bare minimum of refactoring.
+  
+  The data structures used are chosen to have the smallest time complexity for the relevant operations. For storing both the slaves and the masters, hashmaps are used, because the get() and containsKey() are each O(1) time complexity.
+  Inside the slaves and masters lists, their preferences are stored. For the slaves preference lists, arrays are used for easy O(1) accesses when comparing different masters in the list. To make this possible, the values and indexes are inverted in the slaves preference lists.
+  
+  For the masters list, which need not be inverted, a stack (ArrayDeque) us used, because there is only need to access the first or the last element in the lists, and pop() and push() has O(1) time complexity.
+  
+  Overall the time complexity for the algorithm is O($n^2$), in the worst case scenario. The algorithm is implemented with a while loop with time complexity O(1) for each iteration, and in worst case it will loop N*N times. This is if each master have to buy a slave N times and get its least favourite choice (which will never happen for all masters, but it is possible to come close to this worst case for some input data).
+  
+  Note that the parseInput-function also has time complexity O($n^2$), and (if the input is given correctly) always will be T(n) = k * $n^2$. So this has potential to slow down the program a lot.
 
 \end{document}
