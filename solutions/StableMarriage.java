@@ -9,7 +9,7 @@ import java.util.Scanner;
  * 
  * Why does your algorithm obtain a stable solution?
  * The slaves must answer yes when bought -> The matching is perfect (everybody gets matched).
- * The masters buy first the slave they like most, and the slave can only say (or regret afterwards) if they like some other master better.
+ * The masters buy first the slave they like most, and the slave can only say no (or regret afterwards) if they like some other master better.
  * Thus no pair can exist where both the master and the slave want to break to another valid pair - then they would already have broken up.
  * 
  * Could there be other stable solutions? Do you have an example/proof of uniqueness?
@@ -19,8 +19,8 @@ import java.util.Scanner;
  * thus GS-algorithm produces the unique matching where masters get their best choice and slaves their worst (of the valid ones).
  * 
  * Is this (the algorithm) how matching is performed in real life? If not, what flaws does it have?
- * Clear that one part has the final say. Possible for example companies and employees.
- * Also, the slaves have to answer yes to their master, they have no say in getting buyed or not.
+ * Clearly one part has the final say. Possible for example companies and employees.
+ * Also, the slaves have to answer yes to their master, they have no say in getting bought or not.
  * 
  * 
  * */
