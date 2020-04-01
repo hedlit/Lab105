@@ -1,3 +1,5 @@
+//Kommentar
+
 public class Couple implements Comparable<Couple> {
     public Man man;
     public Woman woman;
