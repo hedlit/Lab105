@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorinlistoftodos]{todonotes}
+\pagestyle{empty}
+
+\title{Word ladders report}
+\author{Author 1 and Author 2}
+
+\begin{document}
+  \maketitle
+
+  \section{Results}
+
+  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
+   All the solutions are correct according to the script.
+   On 5large.in the program takes approximately 4 seconds to build the graph and 14 seconds to answer all queries.
+
+  \section{Implementation details}
+
+  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+  I used linked lists both for a node-list and for each nodes neighbor-lists, because I only need to access the beginning and the end of the list, and I used it as a FIFO-queue
+  with O(1) time complexity for these operations.
+  For reasoning about time complexity of different parts, see comments in the code.
+
+
+\end{document}
