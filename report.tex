@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorinlistoftodos]{todonotes}
+\pagestyle{empty}
+
+\title{Word ladders report}
+\author{Tilde Höst and Jessica Lundmark}
+
+\begin{document}
+  \maketitle
+
+  \section{Results}
+
+  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
+  The solution produced correct results. The majority of the time is spent parsing in multiple ways. The whole program takes 3 seconds, with the BF search accounting for less than 10 milliseconds.
+  \section{Implementation details}
+
+  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+    The implementation uses LinkedLists for all storage purposes, only manipulating the ends of them. The population is a list and each node has a list of neighbours.
+    I assume that the time required is n for the loop (through the population) multiplied by Q.
+\end{document}
