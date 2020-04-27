@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorinlistoftodos]{todonotes}
+\pagestyle{empty}
+
+\title{Making Friends Report}
+\author{Author 1 and Author 2}
+
+\begin{document}
+  \maketitle
+
+  \section{Results}
+
+  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
+  
+  Yes, the solutions are correct according to the script.
+  It takes ca. 12 seconds to parse, and 12 seconds to build the MST and calculate the cost of it (with huge.in).
+  
+  WITH KRUSKALS: ca. 8 seconds to parse, and 4 seconds to build MST. MUCH BETTER!
+
+  \section{Implementation details}
+
+  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+  
+  I did not do exactly as the prim-algorithm is described in the book.
+  In the book, all the nodes are added to the queue to chose from, in the beginning. I only add the nodes when they have at least one neighbor in the MST.
+  
+  For storing neighbors I used a hashmap in each node, holding the neighbor node as key and the edge cost as value.
+  This because access to, and finding a value, then is O(1).
+  For 
+  
+  The parse time complexity should be O(m) (only one loop with M iterations, though maybe a big constant).
+  For building the spanning tree, I use a while loop with N iterations (one for each node).
+  Inside the while loop is another loop, with one iteration for every neighbor for the chosen node. So max m iterations.
+  And inside THIS loop, eventually the node has to change key. Then I remove it from the queue and add it again.
+  If instead I would just change priority, that has O(log n), much better.
+  So the inner loop would have O(mlogn) ??
+  And then the total time complexity for building MST would be ....
+  
+  But to decrease key with O(logn) we need to know the index on which each node is inside the heap.
+  Very unclear how to do that...
+  Got the tip to use TreeSet, but that neither has an inbuilt way to change priority...?
+  
+  
+  FOR KRUSKALS: O(mlogm).
+  
+
+\end{document}
