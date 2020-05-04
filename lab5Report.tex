@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorinlistoftodos]{todonotes}
+\pagestyle{empty}
+
+\title{Gorilla Report}
+\author{Author 1 and Author 2}
+
+\begin{document}
+  \maketitle
+
+  \section{Results}
+
+  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
+  Yes, correct according to script.
+  With input 4huge.in it takes around 12 milliseconds to parse and around 2 seconds to answer the queries.
+
+  \section{Implementation details}
+
+  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+  Datastructures used: Matrices for both the gains and the optMatrix, because O(1) access and because size is known beforehand.
+  A hashmap to map each character to its index, to be able to access the right gain in the matrix. O(1) access.
+  
+  Time complexity to build optMatrix for each query is O(n*m) where n is the length of the first string and m the length of the second one.
+  This is because one only has to fill in a matrix of size [n+1]*[m+1], and each filling is constant time (only has to check previous already filled matrix entries).
+  Then: Needs to backtrack to be able to print out the strings that led to the optimal maxgain.
+  This traversing back will probably only visit around n or m (the greatest of the two) of the optMatrix-values.
+  It will at least guaranteed be less than n*m.
+  
+  So with q queries, time complexity of the program is O(q*n*m).
+  
+
+
+\end{document}

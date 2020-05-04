@@ -1,0 +1,42 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorinlistoftodos]{todonotes}
+\pagestyle{empty}
+
+\title{Closest Pair Report}
+\author{Author 1 and Author 2}
+
+\begin{document}
+  \maketitle
+
+  \section{Results}
+
+  \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
+  
+  Yes, correct solutions according to script.
+  Time for 6huger.in:
+      Parse time: ca. 2 seconds.
+      Algorithm time: ca. 3 seconds.s
+  
+
+  \section{Implementation details}
+
+  \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+  
+  Used arrays for Px and Py. Used ArrayList for the set of points close to the line, because one doesn't know from the beginning how many they are,
+  so cannot initialize an array.
+  
+  Parsing is O(n), just reading all the values and storing in an initial array.
+  
+  Sorting the arrays initially, using javas mergesort, is O(nlogn).
+  
+  For every recursive case, n becomes n/2, i.e. there are log(n) recursive calls.
+  In each recursive case, has to divide the array. It is done in O(n) (where n often is much smaller than initial n).
+  Also when looking for points close to the line, that is done in O(n).
+  Checking each linepoint (which in worse case can be n many), is done in O(n) because they only need to be checked against 15 others.
+  So the time complexity is, over all, O(nlogn) (does logn recursive calls with n iterations in each).
+
+\end{document}
