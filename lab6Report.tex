@@ -17,21 +17,27 @@
   \todo[inline]{Briefly comment the results, did the script say all your solutions were correct? Approximately how long time does it take for the program to run on the largest input? What takes the majority of the time?}
   
   Ford Fulkerson:
-  For 3LARGE.in it takes 0.3 seconds to parse and ca. 72 seconds to run the algorithm......
-  (For 4huge.in it doesn't even seem to terminate, or it just takes suuuuuuuper long time, so I have to fix it.)
+  For 4huge.in it takes 0.6 seconds to parse and 1.2 seconds to run the algorithm.
   
   Goldberg Tarjan:
-  For 4huge.in it takes 0.4 seconds to parse and ca. 38 seconds to run the algorithm.....
+  For 4huge.in it takes 0.4 seconds to parse and 0.6 seconds to run the algorithm.
+  Took super long time without the binary search-solution.
 
 
 
   \section{Implementation details}
 
   \todo[inline]{How did you implement the solution? Which data structures were used? Which modifications to these data structures were used? What is the overall running time? Why?}
+	
 	I used many many arrays and matrices instead of doing one edge-class/node-class. Unclear if wise or not, I initially did so because I was uncertain if I wanted to store nodes or edges (edges would have been best).
     Time complexity of the whole algorithm should be O(K*C*M), where M is number of edges, C is all possible flow out from source, and K is number of edges to remove.
     Ford Fulkerson is O(C*M) and the maxflow is computed K times.
     Because M >= N (each node has at least one neighbor) and one bfs can be done in O(n+m) time.
     In worst case, minDelta will be 1 for every path found, and if possible to reach C=maxflow, then C iterations in the while-loop will be done.
+    
+    For both algorithms:
+    The undirected edges are seen as two directed edges, which also serves as backwards edges for each other.
+    The flow for one direction is always the negative of the flow in the other direction.
+    This was not needed to solve the problem, but makes for nicer code.
 
 \end{document}

@@ -1,7 +1,9 @@
 package solutions;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 
@@ -18,7 +20,9 @@ public class GT_Railway {
 	int sink;
 
 	//Capacity-matrix. capacaties[u][v] = capacaties[v][u], since undirected graph
-	int[][] capacities;
+	//Different names for those that always stay their initial value and those who change when removing edges
+	int[][] changedCapacities;
+	int[][] constantCapacities; //When removing routes
 	
     //flow matrix. Stores the flow between u -> v and v -> u.
 	int[][] flows;
@@ -41,6 +45,10 @@ public class GT_Railway {
 	
 	Queue<Integer> indicesToRemove = new LinkedList<Integer>();
 	
+	List<Integer> indicesToRemove2 = new ArrayList<Integer>();
+	
+
+	
 	//All nodes that currently have excessFlow > 0
 	HashSet<Integer> excessNodes;
 
@@ -56,11 +64,12 @@ public class GT_Railway {
 		
 		//Computes and prints out "x f" where x = number of routes to remove, f = maxflow after removing these routes
 		long start2 = System.currentTimeMillis();
-	    gt.algorithm();
+	    //gt.algorithm();
+	    gt.binaryAlgorithm();
 		long stop2 = System.currentTimeMillis();
 		gt.algorithmTime = stop2 - start2;
 	    
-	    //gt.printTimeResult();
+	    gt.printTimeResult();
 	}
 	
 	private void parse() {
@@ -72,7 +81,8 @@ public class GT_Railway {
 		
 		source = 0;
 		sink = N-1;
-		capacities = new int[N][N];
+		changedCapacities = new int[N][N];
+		constantCapacities = new int[N][N];
 		flows = new int[N][N];
 		residualCapacities = new int[N][N];
 		neighbors = new LinkedList[N];
@@ -96,8 +106,10 @@ public class GT_Railway {
 			v = scan.nextInt();
 			c = scan.nextInt();
 			
-			capacities[u][v] = c;
-			capacities[v][u] = c;
+			changedCapacities[u][v] = c;
+			changedCapacities[v][u] = c;
+			constantCapacities[u][v] = c;
+			constantCapacities[v][u] = c;
 			neighbors[u].add(v);
 			neighbors[v].add(u);
 			indicedEdges[i].add(u);
@@ -107,11 +119,86 @@ public class GT_Railway {
 		//P lines with one integer each, where the i-th
 		//line contains the index of the i-th route to be removed.
 		for(int i = 0; i < P; i++) {
-			indicesToRemove.add(scan.nextInt());
+			int index = scan.nextInt();
+			indicesToRemove.add(index);
+			indicesToRemove2.add(index);
 		}
 		
 		scan.close();
 	}
+	
+
+    private void binaryAlgorithm() {
+    	binaryAlgorithm(0, indicesToRemove.size() - 1, Integer.MAX_VALUE, 0); 
+    }
+    
+
+    //Do binary search for how many edges we can remove of the P number of edges given
+  	//First, try to remove half of them. If okay, remove next half etc. If not okay, remove only half of the half etc.
+	private void binaryAlgorithm(int left, int right, int maxFlow, int numRemovedEdges) {
+		int mid = left + (right - left) / 2; 
+		
+		//Base case
+		//If we've already found and removed the maximum amount of edges
+		if(right < left) {
+			if(maxFlow < C) { //must put back the lastly removed node, the only one left, it shouldn't have been removed
+				int toPutBack = indicesToRemove2.get(mid);
+				int node = indicedEdges[toPutBack].get(0);
+				int node2 = indicedEdges[toPutBack].get(1);
+				changedCapacities[node][node2] = constantCapacities[node][node2];
+				changedCapacities[node2][node] = constantCapacities[node][node2];
+				numRemovedEdges--;
+				maxFlow = goldbergTarjanMaxflow(); //will be greater or equal to maxflow
+			}
+			outputPrint(numRemovedEdges, maxFlow);
+			return;
+		}   
+		
+		//Recursive case
+		//If the current maxFlow < C, then we must put back half of the previously removed edges (the rightmost of them)
+		if(maxFlow < C) {
+			int lower = mid;
+			int upper = right;
+			if(right < indicesToRemove.size()) {
+				lower = mid+1;
+				upper = right+1;
+			}
+			for(int i = lower; i <= upper; i++) {
+		    	int toPutBack = indicesToRemove2.get(i);
+				int node = indicedEdges[toPutBack].get(0);
+				int node2 = indicedEdges[toPutBack].get(1);
+				changedCapacities[node][node2] = constantCapacities[node][node2];
+				changedCapacities[node2][node] = constantCapacities[node][node2];
+				numRemovedEdges--;
+		    }
+		} else { //Otherwise, test to remove the leftmost half of the edges
+			for(int i = left; i <= mid; i++) {
+		    	int toRemove = indicesToRemove2.get(i);
+				int node = indicedEdges[toRemove].get(0);
+				int node2 = indicedEdges[toRemove].get(1);
+				changedCapacities[node][node2] = 0;
+				changedCapacities[node2][node] = 0;
+				numRemovedEdges++;
+		    }
+		}
+				
+		//Calculate the new sflow
+	    int newMaxFlow = goldbergTarjanMaxflow();
+	    
+	    //If this works, i.e. maxflox >= C, then continue to test on UPPER half
+	    if(newMaxFlow >= C) {
+	    	binaryAlgorithm(mid+1, right, newMaxFlow, numRemovedEdges);
+	    } else { //If it doesn't work, then try again on LOWER half
+	    	binaryAlgorithm(left, mid-1, newMaxFlow, numRemovedEdges);
+	    }
+		
+	}
+    
+    	
+	private void outputPrint(int numEdgesRemoved, int maxFlow) {
+		System.out.println(numEdgesRemoved + " " + maxFlow);
+	}
+	
 	
 	private void algorithm() {
 		
@@ -127,12 +214,12 @@ public class GT_Railway {
 			int toRemove = indicesToRemove.poll();
 			int node = indicedEdges[toRemove].get(0);
 			int node2 = indicedEdges[toRemove].get(1);
-			capacities[node][node2] = 0;
-			capacities[node2][node] = 0;
+			changedCapacities[node][node2] = 0;
+			changedCapacities[node2][node] = 0;
 			
 			// Calculate max flow again
 			int newMaxflow = goldbergTarjanMaxflow();
-			
+		    
 			// If max flow < C, "put back" edge and terminate
 			if(newMaxflow >= C) {
 				maxFlow = newMaxflow;
@@ -141,8 +228,7 @@ public class GT_Railway {
 				break;
 			}
 		}
-		System.out.println(numEdgesRemoved + " " + maxFlow);
-		
+		outputPrint(numEdgesRemoved, maxFlow);
 	}
 	
 	//Calculates maxflow with goldberg tarjan algorithm (preflow push), returns the maxflow
@@ -154,7 +240,7 @@ public class GT_Railway {
 	    	excessFlows[i] = 0;
 	    	heights[i] = 0;
 	    	for(int j = 0; j < N; j++) {
-	    		residualCapacities[i][j] = capacities[i][j];
+	    		residualCapacities[i][j] = changedCapacities[i][j];
 	    		flows[i][j] = 0;
 	    	}
 	    }
@@ -162,8 +248,9 @@ public class GT_Railway {
 	    
 	    //Starts preflow
 	    for(int neighbor : neighbors[source]) {
-	    	flows[source][neighbor] = capacities[source][neighbor];
-	    	excessFlows[neighbor] = capacities[source][neighbor];
+	    	flows[source][neighbor] = changedCapacities[source][neighbor];
+	    	flows[neighbor][source] = -changedCapacities[source][neighbor];
+	    	excessFlows[neighbor] = changedCapacities[source][neighbor];
 	    	residualCapacities[source][neighbor] = 0;
 	    	if(neighbor != sink && excessFlows[neighbor] > 0) {
 	    	    excessNodes.add(neighbor);
@@ -205,8 +292,9 @@ public class GT_Railway {
 //		}
 		
 		//Obs, since undirected edges, apparently one can almost handle all edges as forward edges....??
-	    int delta = Math.min(excessFlows[from], capacities[from][to] - flows[from][to]);
+	    int delta = Math.min(excessFlows[from], changedCapacities[from][to] - flows[from][to]);
 	    flows[from][to] += delta;
+	    flows[to][from] -= delta; //the flows are negatives of each others
 	    excessFlows[from] -= delta;
 	    excessFlows[to] += delta;
 	    
@@ -218,8 +306,8 @@ public class GT_Railway {
 	    }
 		    
 		//Setting the remaining capacities
-		residualCapacities[from][to] = capacities[from][to] - flows[from][to]; //"forward edge"
-		residualCapacities[to][from] = flows[from][to]; //"backwards edge"
+		residualCapacities[from][to] = changedCapacities[from][to] - flows[from][to]; //forward edge
+		residualCapacities[to][from] = changedCapacities[to][from] + flows[from][to]; //backwards edge, but also its own edge
 	}
 	
 	private void relabel(int node) {

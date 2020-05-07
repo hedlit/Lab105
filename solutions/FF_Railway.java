@@ -3,6 +3,7 @@ package solutions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 
@@ -19,7 +20,7 @@ import java.util.Scanner;
  * NOTE: I had a very hard time understanding the effects of the graph being undirected (and how to use a residual graph anyways).
  * I thought the flow of (from->to) and (to->from) should added together equals the given capacity.
  * So that students could travel both ways at the same edge.
- * But as it seems to work for this program (???) only only way can be used at the same time, either to->from or from->to.
+ * But as it seems to work for this program (???) only one way can be used at the same time, either to->from or from->to.
  * Search for "residualCapacities"-matrix and see the confused comments whenever it is used.
  * 
  * Q&A:
@@ -53,7 +54,10 @@ public class FF_Railway {
 	int cLower; //x = smallest two-potence that is >= C.
 
 	//Capacity-matrix. capacaties[u][v] = capacaties[v][u], since undirected graph
-	int[][] capacities;
+	//Different names for those that always stay their initial value and those who change when removing edges
+	int[][] changedCapacities;
+	int[][] constantCapacities; //When removing routes
+
 	
     //flow matrix. Stores the flow between u -> v
 	int[][] flows;
@@ -70,6 +74,8 @@ public class FF_Railway {
 	
 	
 	Queue<Integer> indicesToRemove = new LinkedList<Integer>();
+	
+	List<Integer> indicesToRemove2 = new ArrayList<Integer>();
 
 	
 	public static void main(String[] args) {
@@ -83,7 +89,8 @@ public class FF_Railway {
 		
 		//Computes and prints out "x f" where x = number of routes to remove, f = maxflow after removing these routes
 		long start2 = System.currentTimeMillis();
-	    fr.algorithm();
+	    //fr.algorithm();
+		fr.binaryAlgorithm();
 		long stop2 = System.currentTimeMillis();
 		fr.algorithmTime = stop2 - start2;
 	    
@@ -105,8 +112,8 @@ public class FF_Railway {
 		
 		source = 0;
 		sink = N-1;
-		capacities = new int[N][N];
-		flows = new int[N][N];
+		changedCapacities = new int[N][N];
+		constantCapacities = new int[N][N];		flows = new int[N][N];
 		residualCapacities = new int[N][N];
 		neighbors = new LinkedList[N];
 		indicedEdges = new LinkedList[M];
@@ -126,8 +133,10 @@ public class FF_Railway {
 			v = scan.nextInt();
 			c = scan.nextInt();
 			
-			capacities[u][v] = c;
-			capacities[v][u] = c;
+			changedCapacities[u][v] = c;
+			changedCapacities[v][u] = c;
+			constantCapacities[u][v] = c;
+			constantCapacities[v][u] = c;
 			neighbors[u].add(v);
 			neighbors[v].add(u);
 			indicedEdges[i].add(u);
@@ -137,11 +146,87 @@ public class FF_Railway {
 		//P lines with one integer each, where the i-th
 		//line contains the index of the i-th route to be removed.
 		for(int i = 0; i < P; i++) {
-			indicesToRemove.add(scan.nextInt());
+			int index = scan.nextInt();
+			indicesToRemove.add(index);
+			indicesToRemove2.add(index);
 		}
 		
 		scan.close();
 	}
+
+
+    private void binaryAlgorithm() {
+    	binaryAlgorithm(0, indicesToRemove.size() - 1, Integer.MAX_VALUE, 0); 
+    }
+    
+
+    //Do binary search for how many edges we can remove of the P number of edges given
+  	//First, try to remove half of them. If okay, remove next half etc. If not okay, remove only half of the half etc.
+	private void binaryAlgorithm(int left, int right, int maxFlow, int numRemovedEdges) {
+		int mid = left + (right - left) / 2; 
+		
+		//Base case
+		//If we've already found and removed the maximum amount of edges
+		if(right < left) {
+			if(maxFlow < C) { //must put back the lastly removed node, the only one left, it shouldn't have been removed
+				int toPutBack = indicesToRemove2.get(mid);
+				int node = indicedEdges[toPutBack].get(0);
+				int node2 = indicedEdges[toPutBack].get(1);
+				changedCapacities[node][node2] = constantCapacities[node][node2];
+				changedCapacities[node2][node] = constantCapacities[node][node2];
+				numRemovedEdges--;
+				maxFlow = fordFulkersonMaxFlow(); //will be greater or equal to maxflow
+			}
+			outputPrint(numRemovedEdges, maxFlow);
+			return;
+		}   
+		
+		//Recursive case
+		//If the current maxFlow < C, then we must put back half of the previously removed edges (the rightmost of them)
+		if(maxFlow < C) {
+			int lower = mid;
+			int upper = right;
+			if(right < indicesToRemove.size()) {
+				lower = mid+1;
+				upper = right+1;
+			}
+			for(int i = lower; i <= upper; i++) {
+		    	int toPutBack = indicesToRemove2.get(i);
+				int node = indicedEdges[toPutBack].get(0);
+				int node2 = indicedEdges[toPutBack].get(1);
+				changedCapacities[node][node2] = constantCapacities[node][node2];
+				changedCapacities[node2][node] = constantCapacities[node][node2];
+				numRemovedEdges--;
+		    }
+		} else { //Otherwise, test to remove the leftmost half of the edges
+			for(int i = left; i <= mid; i++) {
+		    	int toRemove = indicesToRemove2.get(i);
+				int node = indicedEdges[toRemove].get(0);
+				int node2 = indicedEdges[toRemove].get(1);
+				changedCapacities[node][node2] = 0;
+				changedCapacities[node2][node] = 0;
+				numRemovedEdges++;
+		    }
+		}
+				
+		//Calculate the new sflow
+	    int newMaxFlow = fordFulkersonMaxFlow();
+	    
+	    //If this works, i.e. maxflox >= C, then continue to test on UPPER half
+	    if(newMaxFlow >= C) {
+	    	binaryAlgorithm(mid+1, right, newMaxFlow, numRemovedEdges);
+	    } else { //If it doesn't work, then try again on LOWER half
+	    	binaryAlgorithm(left, mid-1, newMaxFlow, numRemovedEdges);
+	    }
+		
+	}
+    
+    	
+	private void outputPrint(int numEdgesRemoved, int maxFlow) {
+		System.out.println(numEdgesRemoved + " " + maxFlow);
+	}
+	
+	
 	
 	private void algorithm() {
 		
@@ -157,8 +242,8 @@ public class FF_Railway {
 			int toRemove = indicesToRemove.poll();
 			int node = indicedEdges[toRemove].get(0);
 			int node2 = indicedEdges[toRemove].get(1);
-			capacities[node][node2] = 0;
-			capacities[node2][node] = 0;
+			changedCapacities[node][node2] = 0;
+			changedCapacities[node2][node] = 0;
 			
 			// Calculate max flow again with Ford Fulkerson
 			int newMaxflow = fordFulkersonMaxFlow();
@@ -182,7 +267,7 @@ public class FF_Railway {
 	    //Initiates residual graph - since undirected puts all capacities to c from beginning...??
 	    for(int i = 0; i < N; i++) {
 	    	for(int j = 0; j < N; j++) {
-	    		residualCapacities[i][j] = capacities[i][j];
+	    		residualCapacities[i][j] = changedCapacities[i][j];
 	    		flows[i][j] = 0;
 	    	}
 	    }
@@ -206,16 +291,17 @@ public class FF_Railway {
 			for(int i = 0; i < path.size() - 1; i++) {
 				int to = path.get(i);
 				int from = path.get(i+1);
-				flows[from][to] += minDelta; //why doesn't it matter what happens with flows[to][from] ???
+				flows[from][to] += minDelta;
+				flows[to][from] -= minDelta; //flow (to->from) should always be -flows(from->to) (negatives of each other)
 				
 				//The residual graph is directed, even though the original graph is not
-				//WHY NO USE OF BACKWARD EDGES????
-				residualCapacities[from][to] = capacities[from][to] - flows[from][to]; //forward edge
-				residualCapacities[to][from] = capacities[from][to] - flows[from][to]; //forward edge
-				// THIS IS WHAT I THOUGHT SHOULD BE USED (it works to use that too, but not needed): residualCapacities[to][from] = flows[from][to]; //backwards edge
+				residualCapacities[from][to] = changedCapacities[from][to] - flows[from][to]; //forward edge
+				residualCapacities[to][from] = changedCapacities[to][from] + flows[from][to]; //use the "other way" on the edge as a backwards edge also
 			}
 			
-			maxFlow += minDelta;
+			if(!path.isEmpty()) {
+			    maxFlow += minDelta;
+			}
 		}
 		return maxFlow;
 	}
